@@ -87,6 +87,7 @@ $(DYNAMIC): $(REALNAME) $(PROGRPRINC)
 #Execution du programme dynamique
 execution: $(DYNAMIC)
 	-LD_LIBRARY_PATH=./$(DIRLIB):$LD_LIBRARY_PATH ./$(DIRLIB)$(DYNAMIC)
+	-cat journal.log
 
 #Move les fichiers dans leur dossier respectif : .so .a et executable dans le dossier build. .o dans le dossier bin
 MOVE: $(DYNAMIC) $(libSTATIC)
