@@ -52,7 +52,7 @@ staticLDLIBS := -l:$(libSTATIC)
 
 #Conception du Makefile :
 #Execution de toutes les commandes les unes à la suite des autres
-all: | MOVE execution
+all: | MOVE execution clean
 
 #Création des dossiers
 MKDIR: lib/journal.c
