@@ -15,7 +15,7 @@ VPATH = lib:build:bin
 
 #Variables pour la confection de la librairie :
 #Options pour les lignes de code faites pour la confection des fichiers objets
-DIROBJ := build/
+DIROBJ := bin/
 CFLAGS += -fPIC -Wall
 OBJETS = $(FICHIERSC:.c=.o)
 FICHIERSC = journal.c
@@ -24,7 +24,7 @@ FICHIERSC = journal.c
 PROGRPRINC = main.o
 
 #Noms des librairies statiques et dynamiques
-DIRLIB := bin/
+DIRLIB := build/
 LINKNAME ?= journal
 libSTATIC := lib$(LINKNAME).a
 MAJEUR ?= .1
@@ -51,13 +51,19 @@ staticLDFLAGS := -L.
 staticLDLIBS := -l:$(libSTATIC)
 
 #Conception du Makefile :
+#Execution de toutes les commandes les unes à la suite des autres
+all: | MOVE execution
+
 #Création des dossiers
-MKDIR:
+MKDIR: lib/journal.c
 	-mkdir build bin
 
 #Fabrication du fichier objet addition.o
 $(OBJETS): CFLAGS := $(CFLAGS)
 $(OBJETS): $(FICHIERSC) MKDIR
+
+#Fabrication du fichier objet main.o
+$(PROGRPRINC): LDFLAGS := $(CFLAGS)
 
 #Conception de l'archive pour la bibliothèque statique
 $(libSTATIC)($(OBJETS)): ARFLAGS := $(ARFLAGS)
@@ -72,11 +78,29 @@ $(REALNAME): $(OBJETS)
 	ln -sf $@ $(SONAMECOURT)
 	ln -sf $@ $(SONAME)
 
-clean: cleanLib cleanNewDir
-	-rm *.a *.o *.so* *programme*
+#Génération du programme dynamique
+$(DYNAMIC): LDFLAGS := $(sharedLDFLAGS)
+$(DYNAMIC): LDLIBS := $(sharedLDLIBS)
+$(DYNAMIC): $(REALNAME) $(PROGRPRINC)
+	$(CC) -o $@ $(PROGRPRINC) $(sharedLDFLAGS) $(sharedLDLIBS)
 
-cleanLib:
-	-rm lib/*.a lib/*.o lib/*.so* lib/*programme*
+#Execution du programme dynamique
+execution: $(DYNAMIC)
+	-LD_LIBRARY_PATH=./$(DIRLIB):$LD_LIBRARY_PATH ./$(DIRLIB)$(DYNAMIC)
 
+#Move les fichiers dans leur dossier respectif : .so .a et executable dans le dossier build. .o dans le dossier bin
+MOVE: $(DYNAMIC) $(libSTATIC)
+	-mv *libjournal* *programme* ./build/
+	-mv *.o ./bin/
+
+#Efface tout les fichiers créés dans le répertoire courant
+clean: cleanNewDir
+# -rm *.a *.o *.so* *programme* *.log
+
+# #Efface tout les fichiers créés dans le dossier lib au cas où un fichier soit dedans
+# cleanLib:
+# 	-rm lib/*.a lib/*.o lib/*.so* lib/*programme* lib/*.log
+
+#Efface tout les dossier build et bin ainsi que leur contenu
 cleanNewDir:
 	-rm -R build/ bin/
