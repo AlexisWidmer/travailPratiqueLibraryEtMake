@@ -66,6 +66,12 @@ $(libSTATIC)($(OBJETS)): $(OBJETS)
 #Règle pour appeler la conception de l'archive
 $(libSTATIC): $(libSTATIC)($(OBJETS))
 
+#Conception de la bibliothèque dynamique avec ses 2 liens symboliques
+$(REALNAME): $(OBJETS)
+	$(CC) $(libCFLAGS)$(SONAME) -o $@ $^
+	ln -sf $@ $(SONAMECOURT)
+	ln -sf $@ $(SONAME)
+
 clean: cleanLib cleanNewDir
 	-rm *.a *.o *.so* *programme*
 
