@@ -1,0 +1,400 @@
+[33m838f7a5[m[33m ([1;36mHEAD[m[33m, [1;31morigin/master[m[33m, [1;32mmaster[m[33m)[m Question 7.d.vi : Permission du Makefile de pouvoir nettoyer tout les fichiers créés a partir de ce dernier, en appelant le all
+:100644 100644 ce6aac3... c9125bd... M	Makefile
+
+[1mdiff --git a/Makefile b/Makefile[m
+[1mindex ce6aac3..c9125bd 100644[m
+[1m--- a/Makefile[m
+[1m+++ b/Makefile[m
+[36m@@ -52,7 +52,7 @@[m [mstaticLDLIBS := -l:$(libSTATIC)[m
+ [m
+ #Conception du Makefile :[m
+ #Execution de toutes les commandes les unes à la suite des autres[m
+[31m-all: | MOVE execution[m
+[32m+[m[32mall: | MOVE execution clean[m
+ [m
+ #Création des dossiers[m
+ MKDIR: lib/journal.c[m
+[33m810963a[m Question 7.d.v : Permission du Makefile de pouvoir faire l'affichage du fichier journal.log créé par le main.c (je ne créé pas de fichier car non réussite du main.c)
+:100644 100644 4f28418... ce6aac3... M	Makefile
+
+[1mdiff --git a/Makefile b/Makefile[m
+[1mindex 4f28418..ce6aac3 100644[m
+[1m--- a/Makefile[m
+[1m+++ b/Makefile[m
+[36m@@ -87,6 +87,7 @@[m [m$(DYNAMIC): $(REALNAME) $(PROGRPRINC)[m
+ #Execution du programme dynamique[m
+ execution: $(DYNAMIC)[m
+ 	-LD_LIBRARY_PATH=./$(DIRLIB):$LD_LIBRARY_PATH ./$(DIRLIB)$(DYNAMIC)[m
+[32m+[m	[32m-cat journal.log[m
+ [m
+ #Move les fichiers dans leur dossier respectif : .so .a et executable dans le dossier build. .o dans le dossier bin[m
+ MOVE: $(DYNAMIC) $(libSTATIC)[m
+[33mf15c799[m Question 7.d.iv : Permission du Makefile de pouvoir faire l'execution duu programme dans le all
+:100644 100644 b76d16f... 4f28418... M	Makefile
+:100644 100644 e69de29... 6259330... M	main.c
+
+[1mdiff --git a/Makefile b/Makefile[m
+[1mindex b76d16f..4f28418 100644[m
+[1m--- a/Makefile[m
+[1m+++ b/Makefile[m
+[36m@@ -15,7 +15,7 @@[m [mVPATH = lib:build:bin[m
+ [m
+ #Variables pour la confection de la librairie :[m
+ #Options pour les lignes de code faites pour la confection des fichiers objets[m
+[31m-DIROBJ := build/[m
+[32m+[m[32mDIROBJ := bin/[m
+ CFLAGS += -fPIC -Wall[m
+ OBJETS = $(FICHIERSC:.c=.o)[m
+ FICHIERSC = journal.c[m
+[36m@@ -24,7 +24,7 @@[m [mFICHIERSC = journal.c[m
+ PROGRPRINC = main.o[m
+ [m
+ #Noms des librairies statiques et dynamiques[m
+[31m-DIRLIB := bin/[m
+[32m+[m[32mDIRLIB := build/[m
+ LINKNAME ?= journal[m
+ libSTATIC := lib$(LINKNAME).a[m
+ MAJEUR ?= .1[m
+[36m@@ -51,14 +51,20 @@[m [mstaticLDFLAGS := -L.[m
+ staticLDLIBS := -l:$(libSTATIC)[m
+ [m
+ #Conception du Makefile :[m
+[32m+[m[32m#Execution de toutes les commandes les unes à la suite des autres[m
+[32m+[m[32mall: | MOVE execution[m
+[32m+[m
+ #Création des dossiers[m
+[31m-MKDIR:[m
+[32m+[m[32mMKDIR: lib/journal.c[m
+ 	-mkdir build bin[m
+ [m
+ #Fabrication du fichier objet addition.o[m
+ $(OBJETS): CFLAGS := $(CFLAGS)[m
+ $(OBJETS): $(FICHIERSC) MKDIR[m
+ [m
+[32m+[m[32m#Fabrication du fichier objet main.o[m
+[32m+[m[32m$(PROGRPRINC): LDFLAGS := $(CFLAGS)[m
+[32m+[m
+ #Conception de l'archive pour la bibliothèque statique[m
+ $(libSTATIC)($(OBJETS)): ARFLAGS := $(ARFLAGS)[m
+ $(libSTATIC)($(OBJETS)): $(OBJETS)[m
+[36m@@ -72,11 +78,29 @@[m [m$(REALNAME): $(OBJETS)[m
+ 	ln -sf $@ $(SONAMECOURT)[m
+ 	ln -sf $@ $(SONAME)[m
+ [m
+[31m-clean: cleanLib cleanNewDir[m
+[31m-	-rm *.a *.o *.so* *programme*[m
+[32m+[m[32m#Génération du programme dynamique[m
+[32m+[m[32m$(DYNAMIC): LDFLAGS := $(sharedLDFLAGS)[m
+[32m+[m[32m$(DYNAMIC): LDLIBS := $(sharedLDLIBS)[m
+[32m+[m[32m$(DYNAMIC): $(REALNAME) $(PROGRPRINC)[m
+[32m+[m	[32m$(CC) -o $@ $(PROGRPRINC) $(sharedLDFLAGS) $(sharedLDLIBS)[m
+[32m+[m
+[32m+[m[32m#Execution du programme dynamique[m
+[32m+[m[32mexecution: $(DYNAMIC)[m
+[32m+[m	[32m-LD_LIBRARY_PATH=./$(DIRLIB):$LD_LIBRARY_PATH ./$(DIRLIB)$(DYNAMIC)[m
+[32m+[m
+[32m+[m[32m#Move les fichiers dans leur dossier respectif : .so .a et executable dans le dossier build. .o dans le dossier bin[m
+[32m+[m[32mMOVE: $(DYNAMIC) $(libSTATIC)[m
+[32m+[m	[32m-mv *libjournal* *programme* ./build/[m
+[32m+[m	[32m-mv *.o ./bin/[m
+[32m+[m
+[32m+[m[32m#Efface tout les fichiers créés dans le répertoire courant[m
+[32m+[m[32mclean: cleanNewDir[m
+[32m+[m[32m# -rm *.a *.o *.so* *programme* *.log[m
+ [m
+[31m-cleanLib:[m
+[31m-	-rm lib/*.a lib/*.o lib/*.so* lib/*programme*[m
+[32m+[m[32m# #Efface tout les fichiers créés dans le dossier lib au cas où un fichier soit dedans[m
+[32m+[m[32m# cleanLib:[m
+[32m+[m[32m# 	-rm lib/*.a lib/*.o lib/*.so* lib/*programme* lib/*.log[m
+ [m
+[32m+[m[32m#Efface tout les dossier build et bin ainsi que leur contenu[m
+ cleanNewDir:[m
+ 	-rm -R build/ bin/[m
+\ No newline at end of file[m
+[1mdiff --git a/main.c b/main.c[m
+[1mindex e69de29..6259330 100644[m
+[1m--- a/main.c[m
+[1m+++ b/main.c[m
+[36m@@ -0,0 +1,7 @@[m
+[32m+[m[32m#include "lib/journal.h"[m
+[32m+[m
+[32m+[m[32mint main()[m
+[32m+[m[32m{[m
+[32m+[m	[32mprintf("Programme main.c\n\n\n");[m
+[32m+[m	[32mreturn 0;[m
+[32m+[m[32m}[m
+\ No newline at end of file[m
+[33medf8893[m Question 7.b : Ajout de la possibilité de faire la bibliothèque partagée avec le Makefile
+:100644 100644 d6b7c72... b76d16f... M	Makefile
+
+[1mdiff --git a/Makefile b/Makefile[m
+[1mindex d6b7c72..b76d16f 100644[m
+[1m--- a/Makefile[m
+[1m+++ b/Makefile[m
+[36m@@ -66,6 +66,12 @@[m [m$(libSTATIC)($(OBJETS)): $(OBJETS)[m
+ #Règle pour appeler la conception de l'archive[m
+ $(libSTATIC): $(libSTATIC)($(OBJETS))[m
+ [m
+[32m+[m[32m#Conception de la bibliothèque dynamique avec ses 2 liens symboliques[m
+[32m+[m[32m$(REALNAME): $(OBJETS)[m
+[32m+[m	[32m$(CC) $(libCFLAGS)$(SONAME) -o $@ $^[m
+[32m+[m	[32mln -sf $@ $(SONAMECOURT)[m
+[32m+[m	[32mln -sf $@ $(SONAME)[m
+[32m+[m
+ clean: cleanLib cleanNewDir[m
+ 	-rm *.a *.o *.so* *programme*[m
+ [m
+[33m53a7e92[m Question 7.a : Ajout des fichiers (premier push) + Compilation possible de la bibliothèque statique
+:000000 100644 0000000... d6b7c72... A	Makefile
+:000000 100644 0000000... 6a29d83... A	lib/journal.c
+:000000 100644 0000000... f801b5b... A	lib/journal.h
+:000000 100644 0000000... e69de29... A	main.c
+
+[1mdiff --git a/Makefile b/Makefile[m
+[1mnew file mode 100644[m
+[1mindex 0000000..d6b7c72[m
+[1m--- /dev/null[m
+[1m+++ b/Makefile[m
+[36m@@ -0,0 +1,76 @@[m
+[32m+[m[32m#Les variables automatiques :[m
+[32m+[m[32m#$@ valeur du  target[m
+[32m+[m[32m#$< nom du premier pré-requis associé au target[m
+[32m+[m[32m#$? nom des pré-requis plus récent que le target[m
+[32m+[m[32m#$^ liste sans répétition des pré-requis[m
+[32m+[m[32m#$+ comme $^ mais avec les répétitions[m
+[32m+[m[32m#$* nom du target avec le suffix tronqué[m
+[32m+[m
+[32m+[m[32m#Variables pour faciliter la saisie et les modifications dans le Makefile :[m
+[32m+[m[32m#Variable pour le compilateur[m
+[32m+[m[32mCC ?= gcc[m
+[32m+[m
+[32m+[m[32m#Variable où aller chercher les fichiers[m
+[32m+[m[32mVPATH = lib:build:bin[m
+[32m+[m
+[32m+[m[32m#Variables pour la confection de la librairie :[m
+[32m+[m[32m#Options pour les lignes de code faites pour la confection des fichiers objets[m
+[32m+[m[32mDIROBJ := build/[m
+[32m+[m[32mCFLAGS += -fPIC -Wall[m
+[32m+[m[32mOBJETS = $(FICHIERSC:.c=.o)[m
+[32m+[m[32mFICHIERSC = journal.c[m
+[32m+[m
+[32m+[m[32m#Nom du programme principal[m
+[32m+[m[32mPROGRPRINC = main.o[m
+[32m+[m
+[32m+[m[32m#Noms des librairies statiques et dynamiques[m
+[32m+[m[32mDIRLIB := bin/[m
+[32m+[m[32mLINKNAME ?= journal[m
+[32m+[m[32mlibSTATIC := lib$(LINKNAME).a[m
+[32m+[m[32mMAJEUR ?= .1[m
+[32m+[m[32mMINEUR ?= .1[m
+[32m+[m[32mCORRECTION ?= .57[m
+[32m+[m[32mSONAMECOURT := lib$(LINKNAME).so[m
+[32m+[m[32mSONAME := $(SONAMECOURT)$(MAJEUR)[m
+[32m+[m[32mREALNAME := $(SONAME)$(MINEUR)$(CORRECTION)[m
+[32m+[m
+[32m+[m[32m#Options pour les librairies[m
+[32m+[m[32mlibCFLAGS = -shared -fPIC -Wl,-soname,[m
+[32m+[m[32mlibLDFLAGS = -L.[m
+[32m+[m[32mlibLDLIBS = -lc[m
+[32m+[m
+[32m+[m[32m#Options pour l'archive[m
+[32m+[m[32mARFLAGS = rcs[m
+[32m+[m
+[32m+[m[32m#Options des programmes en statique et dynamique[m
+[32m+[m[32mSTATIC = programme.static[m
+[32m+[m[32mDYNAMIC = programme.shared[m
+[32m+[m[32msharedLDFLAGS := -L.[m
+[32m+[m[32msharedLDLIBS := -l$(LINKNAME)[m
+[32m+[m[32mstaticLDFLAGS := -L.[m
+[32m+[m[32mstaticLDLIBS := -l:$(libSTATIC)[m
+[32m+[m
+[32m+[m[32m#Conception du Makefile :[m
+[32m+[m[32m#Création des dossiers[m
+[32m+[m[32mMKDIR:[m
+[32m+[m	[32m-mkdir build bin[m
+[32m+[m
+[32m+[m[32m#Fabrication du fichier objet addition.o[m
+[32m+[m[32m$(OBJETS): CFLAGS := $(CFLAGS)[m
+[32m+[m[32m$(OBJETS): $(FICHIERSC) MKDIR[m
+[32m+[m
+[32m+[m[32m#Conception de l'archive pour la bibliothèque statique[m
+[32m+[m[32m$(libSTATIC)($(OBJETS)): ARFLAGS := $(ARFLAGS)[m
+[32m+[m[32m$(libSTATIC)($(OBJETS)): $(OBJETS)[m
+[32m+[m
+[32m+[m[32m#Règle pour appeler la conception de l'archive[m
+[32m+[m[32m$(libSTATIC): $(libSTATIC)($(OBJETS))[m
+[32m+[m
+[32m+[m[32mclean: cleanLib cleanNewDir[m
+[32m+[m	[32m-rm *.a *.o *.so* *programme*[m
+[32m+[m
+[32m+[m[32mcleanLib:[m
+[32m+[m	[32m-rm lib/*.a lib/*.o lib/*.so* lib/*programme*[m
+[32m+[m
+[32m+[m[32mcleanNewDir:[m
+[32m+[m	[32m-rm -R build/ bin/[m
+\ No newline at end of file[m
+[1mdiff --git a/lib/journal.c b/lib/journal.c[m
+[1mnew file mode 100644[m
+[1mindex 0000000..6a29d83[m
+[1m--- /dev/null[m
+[1m+++ b/lib/journal.c[m
+[36m@@ -0,0 +1,58 @@[m
+[32m+[m[32m#include "journal.h"[m
+[32m+[m
+[32m+[m[32mstatic FILE *journal;[m
+[32m+[m[32mstatic niveau_t niveau_journalisation;[m
+[32m+[m
+[32m+[m[32mint ouvrir_journal(niveau_t niveau, char* nom_fichier, FILE* fichier, int ajouter) {[m
+[32m+[m[32m    if (nom_fichier != NULL) {[m
+[32m+[m[32m        if (fichier != NULL) {[m
+[32m+[m[32m            return -1;[m
+[32m+[m[32m        }[m
+[32m+[m[32m        journal = fopen(nom_fichier, ajouter ? "a" : "w");[m
+[32m+[m[32m        if (journal == NULL) {[m
+[32m+[m[32m            return -1;[m
+[32m+[m[32m        }[m
+[32m+[m[32m    } else if (fichier != NULL) {[m
+[32m+[m[32m        journal = fichier;[m
+[32m+[m[32m    } else {[m
+[32m+[m[32m        return -1;[m
+[32m+[m[32m    }[m
+[32m+[m[32m    niveau_journalisation = niveau;[m
+[32m+[m[32m    return 0;[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mvoid ecrire_entree_journal(niveau_t niveau, char* fichier, int ligne, char* format, ...) {[m
+[32m+[m[32m    if (niveau > niveau_journalisation || journal == NULL) {[m
+[32m+[m[32m        return;[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    struct tm * timeinfo;[m
+[32m+[m[32m    time_t rawtime;[m
+[32m+[m[32m    char buffer [20];[m
+[32m+[m[32m    time (&rawtime);[m
+[32m+[m[32m    timeinfo = localtime (&rawtime);[m
+[32m+[m[32m    strftime(buffer,20,"%Y-%d-%m %H:%M:%S",timeinfo);[m
+[32m+[m
+[32m+[m[32m    fprintf(journal, "[%s] ", buffer);[m
+[32m+[m
+[32m+[m[32m    if (niveau_journalisation == DEBUG) {[m
+[32m+[m[32m        fprintf(journal, "%s:%d:", fichier, ligne);[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    fprintf(journal, "%s: ", niveau_vers_chaine[niveau]);[m
+[32m+[m
+[32m+[m[32m    va_list ap;[m
+[32m+[m[32m    va_start(ap, format);[m
+[32m+[m[32m    vfprintf(journal, format, ap);[m
+[32m+[m[32m    va_end(ap);[m
+[32m+[m[32m    fprintf(journal, "\n");[m
+[32m+[m
+[32m+[m[32m    if (niveau_journalisation == DEBUG) {[m
+[32m+[m[32m        fflush(journal);[m
+[32m+[m[32m    }[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mvoid fermer_journal(void) {[m
+[32m+[m[32m    fclose(journal);[m
+[32m+[m[32m    journal = NULL;[m
+[32m+[m[32m}[m
+[1mdiff --git a/lib/journal.h b/lib/journal.h[m
+[1mnew file mode 100644[m
+[1mindex 0000000..f801b5b[m
+[1m--- /dev/null[m
+[1m+++ b/lib/journal.h[m
+[36m@@ -0,0 +1,91 @@[m
+[32m+[m[32m#ifndef _LIBJOURNAL_JOURNAL_H_[m
+[32m+[m[32m#define _LIBJOURNAL_JOURNAL_H_[m
+[32m+[m
+[32m+[m[32m#include <stdarg.h>[m
+[32m+[m[32m#include <stdio.h>[m
+[32m+[m[32m#include <time.h>[m
+[32m+[m
+[32m+[m[32m/** Énumération des différents niveaux de criticité de journalisation.[m
+[32m+[m[32m *[m
+[32m+[m[32m * Chaque énumération peut être convertie en chaîne de caractère grâce à la[m
+[32m+[m[32m * structure de données niveau_vers_chaine[].[m
+[32m+[m[32m *[m
+[32m+[m[32m * @see niveau_vers_chaine[][m
+[32m+[m[32m **/[m
+[32m+[m[32mtypedef enum {[m
+[32m+[m[32m    NONE = 0,[m
+[32m+[m[32m    ERROR = 1,[m
+[32m+[m[32m    WARNING = 2,[m
+[32m+[m[32m    INFO = 3,[m
+[32m+[m[32m    DEBUG = 4,[m
+[32m+[m[32m} niveau_t;[m
+[32m+[m
+[32m+[m[32m/** Tableau de chaînes assurant la conversion niveau de criticité => texte[m
+[32m+[m[32m *[m
+[32m+[m[32m **/[m
+[32m+[m[32mstatic char *niveau_vers_chaine[] = {[m
+[32m+[m[32m    NULL,[m
+[32m+[m[32m    "ERROR",[m
+[32m+[m[32m    "WARNING",[m
+[32m+[m[32m    "INFO",[m
+[32m+[m[32m    "DEBUG",[m
+[32m+[m[32m};[m
+[32m+[m
+[32m+[m[32m/** Initialise la journalisation.[m
+[32m+[m[32m *[m
+[32m+[m[32m * @param niveau Tout futur appel à ecrire_entree_journal() ne journalisera[m
+[32m+[m[32m * qu'à un niveau inférieur ou égal à ce niveau de criticité.[m
+[32m+[m[32m * @param nom_fichier La chaîne de caractères définissant le chemin du fichier de[m
+[32m+[m[32m * journalisation.[m
+[32m+[m[32m * @param fichier Pointeur sur FILE d'un fichier déjà déclaré.[m
+[32m+[m[32m * @param ajouter Mode ajout au fichier si différent de 0, mode écrasé si égal à 0.[m
+[32m+[m[32m *[m
+[32m+[m[32m * @return 0 si tout va bien, -1 sinon[m
+[32m+[m[32m *[m
+[32m+[m[32m * @see ecrire_entree_journal[m
+[32m+[m[32m **/[m
+[32m+[m[32mint ouvrir_journal(niveau_t niveau, char* nom_fichier, FILE* fichier, int ajouter);[m
+[32m+[m
+[32m+[m[32m/** Écrit une entrée dans le fichier de journalisation.[m
+[32m+[m[32m *[m
+[32m+[m[32m * Ne peut être appellé SI ET SEULEMENT SI ouvrir_journal a été appelé et n'a pas[m
+[32m+[m[32m * retourné d'erreur.[m
+[32m+[m[32m *[m
+[32m+[m[32m * @param niveau Le niveau de criticité de l'entrée à journaliser[m
+[32m+[m[32m * @param fichier Une chaîne décrivant le fichier réalisant l'entrée. __FILE__ est[m
+[32m+[m[32m * sans nul doute ce que vous préféreriez saisir.[m
+[32m+[m[32m * @param ligne Un nombre décrivant le numéro de la ligne réalisant l'entrée. __LINE__[m
+[32m+[m[32m * est sans nul doute ce que vous préféreriez saisir.[m
+[32m+[m[32m * @param format La chaîne de caractères spécifiant le message à journaliser formatée[m
+[32m+[m[32m * comme une 'printf format string'.[m
+[32m+[m[32m *[m
+[32m+[m[32m * @see JOURNAL[m
+[32m+[m[32m **/[m
+[32m+[m[32mvoid ecrire_entree_journal(niveau_t niveau, char* fichier, int ligne, char* format, ...);[m
+[32m+[m
+[32m+[m[32m/** MACRO permettant de faciliter l'ajout d'une entrée au journal.[m
+[32m+[m[32m *[m
+[32m+[m[32m * Cette MACRO fournie une interface simplifiée à ecrire_entree_journal()[m
+[32m+[m[32m * en passant les définitions \__FILE__ et \__LINE__ correspondant toutes deux[m
+[32m+[m[32m * au fichier appelant la MACRO et le numéro de ligne d'appel à la MACRO,[m
+[32m+[m[32m * respectivement.[m
+[32m+[m[32m *[m
+[32m+[m[32m * @param niveau Le niveau de criticité de l'entrée.[m
+[32m+[m[32m * @param args La chaîne de caractères spécifiant le message à journaliser[m
+[32m+[m[32m * (accompagnée des variables si nécessaire).[m
+[32m+[m[32m *[m[41m [m
+[32m+[m[32m * @see ecrire_entree_journal()[m
+[32m+[m[32m **/[m
+[32m+[m[32m#define JOURNAL(niveau, args...) \[m
+[32m+[m[32m    ecrire_entree_journal(niveau, __FILE__, __LINE__, args)[m
+[32m+[m
+[32m+[m[32m/** Termine l'utilisation possible de la journalisation.[m
+[32m+[m[32m *[m
+[32m+[m[32m * Clos le fichier de journalisation et empêche tout ajout d'une nouvelle entrée[m
+[32m+[m[32m * au journal.[m
+[32m+[m[32m *[m[41m [m
+[32m+[m[32m * @see ouvrir_journal()[m
+[32m+[m[32m **/[m
+[32m+[m[32mvoid fermer_journal(void);[m
+[32m+[m
+[32m+[m[32m#endif[m
+[1mdiff --git a/main.c b/main.c[m
+[1mnew file mode 100644[m
+[1mindex 0000000..e69de29[m
